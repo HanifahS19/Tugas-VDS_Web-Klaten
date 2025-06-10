@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Peta Wilayah Klaten</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+        crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <link rel="stylesheet" href="plugin/leaflet-search-master/dist/leaflet-search.min.css" />
+    <link rel="stylesheet" href="plugin/Leaflet.defaultextent-master/dist/leaflet.defaultextent.css" />
+
+    <style>
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: calc(100vh - 56px);
+        }
+
+        .legend {
+            background: white;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            line-height: 1.5em;
+        }
+
+        .legend img {
+            cursor: pointer;
+            margin-bottom: 5px;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Style tombol custom (search & home) */
+        .leaflet-control.custom-buttons a {
+            display: block;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            background: white;
+            color: black;
+            border: 1px solid #ccc;
+            border-top: none;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .leaflet-control.custom-buttons a:first-child {
+            border-top: 1px solid #ccc;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .leaflet-control.custom-buttons a:last-child {
+            border-radius: 0 0 4px 4px;
+        }
+
+        .leaflet-control.custom-buttons a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .legend {
+            background: white;
+            padding: 10px;
+            color: #333;
+            font-size: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+
+            display: flex;
+            flex-wrap: wrap;
+            /* biar bisa multiple baris/kolom */
+            max-width: 350px;
+            /* sesuaikan lebar legend */
+            gap: 10px;
+            /* jarak antar item */
+        }
+
+        .legend strong {
+            width: 100%;
+            /* buat judul legend full lebar */
+            margin-bottom: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            width: 180px;
+            /* lebar tiap item, supaya 2 kolom cukup 350px */
+            margin-bottom: 4px;
+        }
+
+        .legend-box {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            flex-shrink: 0;
+            vertical-align: middle;
+        }
+    </style>
+
+    </style>
+</head>
+
+<body>
+    <!-- Modal Informasi Umbul -->
+    <div class="modal fade" id="featureModal" tabindex="-1" aria-labelledby="featureModalTitle" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="featureModalTitle">Informasi Umbul</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body" id="featureModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#"><i class="fa-solid fa-map-location-dot"></i> Hal Yang Terdapat Pada Wilayah klaten</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://klaten.go.id/"><i class="fa-solid fa-city"></i> Informasi Klaten</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#infoModal"><i
+                                class="fa-solid fa-circle-info"></i> Info</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Map Container -->
+    <div id="map"></div>
+
+    <!-- Modal Info Pembuat -->
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="infoModalLabel">Info Pembuat</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped">
+                        <tr>
+                            <th>Nama</th>
+                            <td>Hanifah Sabdani</td>
+                        </tr>
+                        <tr>
+                            <th>NIM</th>
+                            <td>521110</td>
+                        </tr>
+                        <tr>
+                            <th>Kelas</th>
+                            <td>B</td>
+                        </tr>
+                        <tr>
+                            <th>Github</th>
+                            <td><a href="https://github.com/HanifahS19" target="_blank"
+                                    rel="noopener noreferrer">https://github.com/HanifahS19</a></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="plugin/leaflet-search-master/dist/leaflet-search.min.js"></script>
+    <script src="plugin/Leaflet.defaultextent-master/dist/leaflet.defaultextent.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.6/proj4.js"></script>
+
+    <script>
+        // Inisialisasi peta
+        var map = L.map('map').setView([-7.701108026587373, 110.64482887186958], 12);
+
+        // BaseMaps
+        var osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        var esriWorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        });
+
+        var rupabumiIndonesia = L.tileLayer('https://geoservices.big.go.id/rbi/rest/services/BASEMAP/Rupabumi_Indonesia/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Badan Informasi Geospasial'
+        });
+map.createPane('klatenPane');
+map.getPane('klatenPane').style.zIndex = 400;
+
+map.createPane('dataAtasPane');
+map.getPane('dataAtasPane').style.zIndex = 650;
+
+       
+
+
+
+        // Layer GeoJSON Pariwisata
+        var pariwisata_layer = L.geoJSON(null, {
+            pane: 'dataAtasPane',
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng);
+            },
+            onEachFeature: function (feature, layer) {
+                var popupContent =
+                    "<strong>Nama pariwisata:</strong> " + feature.properties.Nama + "<br>" +
+                    "<strong>Koordinat X:</strong> " + feature.properties.X + "<br>" +
+                    "<strong>Koordinat Y:</strong> " + feature.properties.Y;
+
+                layer.on({
+                    click: function () {
+                        $("#featureModalTitle").html("Informasi Pariwisata");
+                        $("#featureModalBody").html(popupContent);
+                        $("#featureModal").modal("show");
+                    },
+                    mouseover: function () {
+                        layer.bindTooltip(feature.properties.Nama, { direction: "top", sticky: true }).openTooltip();
+                    }
+                });
+            }
+        });
+        // Load GeoJSON Pariwisata
+        $.getJSON("data/pariwisata.geojson", function (data) {
+            pariwisata_layer.addData(data);
+            pariwisata_layer.addTo(map);
+            map.fitBounds(pariwisata_layer.getBounds());
+
+            // Control Search untuk Pariwisata
+            var searchPariwisata = new L.Control.Search({
+                layer: pariwisata_layer,
+                propertyName: 'Nama',
+                zoom: 14,
+                marker: false,
+                textPlaceholder: 'Cari Nama Wisata...',
+                collapsed: true
+            });
+            map.addControl(searchPariwisata);
+        }).fail(function () {
+            console.error("Gagal memuat GeoJSON Pariwisata.");
+        });
+
+        function getColorByREMARK(REMARK) {
+            switch (REMARK) {
+                case "Aktif": return "#ff0000";       // warna merah
+                case "Nonaktif": return "#999999";    // warna abu-abu
+                default: return "#cccccc";            // warna default
+            }
+        }
+
+        var relkereta_layer = L.geoJSON(null, {
+             pane: 'dataAtasPane',
+            style: function (feature) {
+                return {
+                    color: "#555555",      // warna abu gelap seperti rel
+                    weight: 4,             // ketebalan garis
+                    opacity: 0.9,          // transparansi
+                    dashArray: '1, 6'      // efek putus-putus seperti rel
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                var popupContent =
+                    "<strong>Status rel kereta:</strong> " + feature.properties.REMARK + "<br>";
+                layer.on({
+                    click: function () {
+                        $("#featureModalTitle").html("Informasi relkereta");
+                        $("#featureModalBody").html(popupContent);
+                        $("#featureModal").modal("show");
+                    },
+                    mouseover: function () {
+                        layer.bindTooltip(feature.properties.NAMOBJ, { direction: "top", sticky: true }).openTooltip();
+                    }
+                });
+            }
+        });
+
+        $.getJSON("data/relkereta.geojson", function (data) {
+            
+            relkereta_layer.addData(data);
+            relkereta_layer.addTo(map);
+        }).fail(function () {
+            console.error("Gagal memuat GeoJSON Klaten.");
+        });
+
+        // Layer stasiun sebagai titik
+        var stasiun_layer = L.geoJSON(null, {
+            pane: 'dataAtasPane',
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 6,
+                    fillColor: "#ff0000",    // warna merah untuk stasiun
+                    color: "#000",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+            },
+            onEachFeature: function (feature, layer) {
+                var popupContent =
+                    "<strong>Nama Stasiun:</strong> " + feature.properties.NAMOBJ + "<br>";
+                layer.on({
+                    click: function () {
+                        $("#featureModalTitle").html("Informasi Stasiun");
+                        $("#featureModalBody").html(popupContent);
+                        $("#featureModal").modal("show");
+                    },
+                    mouseover: function () {
+                        layer.bindTooltip(feature.properties.NAMOBJ, { direction: "top", sticky: true }).openTooltip();
+                    }
+                });
+            }
+        });
+
+        // Memuat data GeoJSON stasiun
+        $.getJSON("data/stasiun.geojson", function (data) {
+            
+            stasiun_layer.addData(data);
+            stasiun_layer.addTo(map);
+        }).fail(function () {
+            console.error("Gagal memuat GeoJSON stasiun.");
+        });
+
+        // Layer kuliner (makanan) sebagai titik
+        var makanan_layer = L.geoJSON(null, {
+            pane: 'dataAtasPane',
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 8,
+                    fillColor: "#ff9900",    // oranye khas makanan
+                    color: "#663300",        // coklat tua
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.9
+                });
+            }, // <- koma di sini penting!
+
+            onEachFeature: function (feature, layer) {
+                var popupContent =
+                    "<strong>Nama makanan:</strong> " + feature.properties.Nama_Makan + "<br>";
+                layer.on({
+                    click: function () {
+                        $("#featureModalTitle").html("Informasi makanan");
+                        $("#featureModalBody").html(popupContent);
+                        $("#featureModal").modal("show");
+                    },
+                    mouseover: function () {
+                        layer.bindTooltip(feature.properties.Nama_Makan, { direction: "top", sticky: true }).openTooltip();
+                    }
+                });
+            }
+        });
+
+        // Memuat data GeoJSON makanan
+        $.getJSON("data/makanan.geojson", function (data) {
+            
+            makanan_layer.addData(data);
+            makanan_layer.addTo(map);
+        }).fail(function () {
+            console.error("Gagal memuat GeoJSON makanan.");
+        });
+
+
+
+
+
+        // Layer GeoJSON Klaten (dengan simbolisasi warna)
+        var klaten_layer = L.geoJSON(null, {
+            pane: 'klatenPane',
+        
+            style: function (feature) {
+                return {
+                    color: "#ffffff",
+                    weight: 1,
+                    fillOpacity: 0.6,
+                    fillColor: getColorByKecamatan(feature.properties.NAMOBJ)
+                };
+            },
+            onEachFeature: function (feature, layer) {
+                var popupContent =
+                    "<strong>Kecamatan:</strong> " + feature.properties.NAMOBJ + "<br>" +
+                    "<strong>Jumlah Wisata:</strong> " + feature.properties.Jumlah_WST;
+
+                layer.on({
+                    click: function () {
+                        $("#featureModalTitle").html("Informasi Klaten");
+                        $("#featureModalBody").html(popupContent);
+                        $("#featureModal").modal("show");
+                    },
+                    mouseover: function () {
+                        layer.bindTooltip(feature.properties.NAMOBJ, { direction: "top", sticky: true }).openTooltip();
+                    }
+                });
+            }
+        });
+
+        // Load GeoJSON Klaten
+        $.getJSON("data/klaten.geojson", function (data) {
+            klaten_layer.addData(data);
+            klaten_layer.addTo(map);
+        }).fail(function () {
+            console.error("Gagal memuat GeoJSON Klaten.");
+        });
+
+        // Custom Control Tombol Search & Home
+        var customButtons = L.Control.extend({
+            options: {
+                position: 'topleft'
+            },
+            onAdd: function () {
+                var container = L.DomUtil.create('div', 'leaflet-control custom-buttons');
+                // Tambahkan tombol di sini jika diinginkan
+                return container;
+            }
+        });
+        map.addControl(new customButtons());
+        
+
+        map.createPane('klatenPane');
+map.getPane('klatenPane').style.zIndex = 300;
+
+map.createPane('dataAtasPane');
+map.getPane('dataAtasPane').style.zIndex = 650;
+
+        
+        
+
+        // Kontrol Layer
+        var baseMaps = {
+            "OpenStreetMap": osm,
+            "Esri World Imagery": esriWorldImagery,
+            "Rupa Bumi Indonesia": rupabumiIndonesia
+        };
+
+        var overlayMaps = {
+            "Pariwisata": pariwisata_layer,
+            "Klaten": klaten_layer,
+            "Rel Kereta Api": relkereta_layer,
+            "Stasiun": stasiun_layer,
+            "Rumah Makan Rekomendasi": makanan_layer,
+        };
+
+        L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+        // Default extent control
+        L.control.defaultExtent().addTo(map);
+
+        // Watermark logo
+        L.Control.Watermark = L.Control.extend({
+            onAdd: function () {
+                var img = L.DomUtil.create('img');
+                img.src = 'icon/logo_sv_ugm.png';
+                img.style.width = '150px';
+                img.style.opacity = '0.7';
+                return img;
+            }
+        });
+        L.control.watermark = function (opts) {
+            return new L.Control.Watermark(opts);
+        };
+        L.control.watermark({ position: 'bottomright' }).addTo(map);
+
+         // Fungsi untuk menentukan warna berdasarkan nama kecamatan
+        function getColorByKecamatan(WADMKC) {
+            const colors = {
+                "Wedi": "#f03b20",
+                "Wonosari": "#feb24c",
+                "Cawas": "#2b8cbe",
+                "Bayat": "#74c476",
+                "Delanggu": "#9e9ac8",
+                "Juwiring": "#fc9272",
+                "Prambanan": "#ffb3ff",
+                "Gantiwarno": "#cc99ff",
+                "Jogonalan": "#66b3ff",
+                "Trucuk": "#00bfff",
+                "Kebonarum": "#00ff99",
+                "Manisrenggo": "#ddff99",
+                "Karangnongko": "#99e600",
+                "Ceper": "#ffff1a",
+                "Pedan": "#999900",
+                "Karangdowo": "#ffd24d",
+                "Polanharjo": "#e6ac00",
+                "Karangom": "#997300",
+                "Tulung": "#ffd699",
+                "Jatinom": "#1affff",
+                "Kemalang": "#00b3b3",
+                "Ngawen": "#ffb399",
+                "Kalikotes": "#e63900",
+                "Klaten Utara": "#802000",
+                "Klaten Tengah": "#94b8b8",
+                "Klaten Selatan": "#8cd9b3"
+
+                // Tambahkan kecamatan lainnya jika ada
+
+            };
+            return colors[WADMKC] || "#ccc";
+        }
+        <!-- Tambahkan di dalam <script> utama JS (gantilah bagian bawah script kamu) -->
+        // Legend Control
+        var legendControl = L.control({ position: 'bottomleft' });
+        legendControl.onAdd = function () {
+            var div = L.DomUtil.create('div', 'legend');
+            div.innerHTML = `
+                <strong>Legenda Kecamatan</strong><br />
+                <i style="background: #f03b20;" class="legend-box"></i> Wedi<br />
+                <i style="background: #feb24c;" class="legend-box"></i> Wonosari<br />
+                <i style="background: #2b8cbe;" class="legend-box"></i> Cawas<br />
+                <i style="background: #74c476;" class="legend-box"></i> Bayat<br />
+                <i style="background: #9e9ac8;" class="legend-box"></i> Delanggu<br />
+                <i style="background: #fc9272;" class="legend-box"></i> Juwiring<br />
+                <i style="background: #ffb3ff;" class="legend-box"></i> Prambanan<br />
+                <i style="background: #cc99ff;" class="legend-box"></i> Gantiwarno<br />
+                <i style="background: #66b3ff;" class="legend-box"></i> Jogonalan<br />
+                <i style="background: #00bfff;" class="legend-box"></i> Trucuk<br />
+                <i style="background: #00ff99;" class="legend-box"></i> Kebonarum<br />
+                <i style="background: #ddff99;" class="legend-box"></i> Manisrenggo<br />
+                <i style="background: #99e600;" class="legend-box"></i> Karangnongko<br />
+                <i style="background: #ffff1a;" class="legend-box"></i> Ceper<br />
+                <i style="background: #999900;" class="legend-box"></i> Pedan<br />
+                <i style="background: #ffd24d;" class="legend-box"></i> Karangdowo<br />
+                <i style="background: #e6ac00;" class="legend-box"></i> Polanharjo<br />
+                <i style="background: #997300;" class="legend-box"></i> Karangom<br />
+                <i style="background: #ffd699;" class="legend-box"></i> Tulung<br />
+                <i style="background: #1affff;" class="legend-box"></i> Jatinom<br />
+                <i style="background: #00b3b3;" class="legend-box"></i> Kemalang<br />
+                <i style="background: #ffb399;" class="legend-box"></i> Ngawen<br />
+                <i style="background: #e63900;" class="legend-box"></i> Kalikotes<br />
+                <i style="background: #802000;" class="legend-box"></i> Klaten Utara<br />
+                <i style="background: #94b8b8;" class="legend-box"></i> Klaten Tengah<br />
+                <i style="background: #8cd9b3;" class="legend-box"></i> Klaten Selatan<br />
+
+        <strong>Legenda Simbol</strong><br />
+        <i style="background: #2e6da4; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Pariwisata<br />
+        <i style="background: #555555; width: 25px; height: 4px; display: inline-block; border-bottom: 2px dashed white;"></i> Rel Kereta<br />
+        <i style="background: #ff0000; border: 1px solid #000; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Stasiun<br />
+        <i style="background: #ff9900; border: 2px solid #663300; border-radius: 50%; width: 12px; height: 12px; display: inline-block;"></i> Rumah Makan<br />
+            `;
+            return div;
+        };
+        legendControl.addTo(map);
+
+
+
+    </script>
+
+</body>
+
+</html>

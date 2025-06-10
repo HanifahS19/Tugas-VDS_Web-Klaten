@@ -1,0 +1,17 @@
+{
+"type": "FeatureCollection",
+"name": "Umbul",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "No": 1.0, "Nama": "Umbul Nilo", "X": 460496.0, "Y": 9160647.0 }, "geometry": { "type": "Point", "coordinates": [ 110.64187008113538, -7.59329741609776 ] } },
+{ "type": "Feature", "properties": { "No": 2.0, "Nama": "Umbul Pelem", "X": 461320.0, "Y": 9160764.0 }, "geometry": { "type": "Point", "coordinates": [ 110.649340947989828, -7.592245178038816 ] } },
+{ "type": "Feature", "properties": { "No": 3.0, "Nama": "Umbul Pluneng Tirtomulyo", "X": 451820.0, "Y": 9149311.0 }, "geometry": { "type": "Point", "coordinates": [ 110.563113574218335, -7.695764602047154 ] } },
+{ "type": "Feature", "properties": { "No": 4.0, "Nama": "Umbul Gendaren", "X": 455549.0, "Y": 9154842.0 }, "geometry": { "type": "Point", "coordinates": [ 110.59697388193706, -7.645767218590268 ] } },
+{ "type": "Feature", "properties": { "No": 5.0, "Nama": "Umbul Brintik", "X": 451617.0, "Y": 9150099.0 }, "geometry": { "type": "Point", "coordinates": [ 110.561280171784986, -7.688634932790523 ] } },
+{ "type": "Feature", "properties": { "No": 6.0, "Nama": "Umbul Geneng", "X": 451860.0, "Y": 9150792.0 }, "geometry": { "type": "Point", "coordinates": [ 110.563489967982008, -7.682368699647395 ] } },
+{ "type": "Feature", "properties": { "No": 7.0, "Nama": "Umbul Brondong", "X": 452048.0, "Y": 9150609.0 }, "geometry": { "type": "Point", "coordinates": [ 110.565192943101223, -7.684025741492867 ] } },
+{ "type": "Feature", "properties": { "No": 8.0, "Nama": "Umbul Kemanten", "X": 461459.0, "Y": 9160837.0 }, "geometry": { "type": "Point", "coordinates": [ 110.65060158945802, -7.591585867129649 ] } },
+{ "type": "Feature", "properties": { "No": 9.0, "Nama": "Umbul Ponggok", "X": 459835.0, "Y": 9158381.0 }, "geometry": { "type": "Point", "coordinates": [ 110.635860485192083, -7.61378962831088 ] } },
+{ "type": "Feature", "properties": { "No": 10.0, "Nama": "Umbul Kapilaler", "X": 460840.0, "Y": 9159203.0 }, "geometry": { "type": "Point", "coordinates": [ 110.644977900182155, -7.606361749116126 ] } }
+]
+}
